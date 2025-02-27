@@ -6,19 +6,23 @@
 //
 
 import SwiftUI
+import SwiftData
 
 struct DetailView: View {
-    @State var toDoText: String
+    @State var toDo: ToDo
+    
+    @State private var item = ""
     @State private var reminderIsOn = false
     @State private var dueDate = Calendar.current.date(byAdding: .day, value: 1, to: Date.now)!
     @State private var notes = ""
     @State private var isCompleted = false
     
     @Environment(\.dismiss) private var dismiss
+    @Environment(\.modelContext) var modelContext
     
     var body: some View {
         List {
-            TextField("Enter To Do here:", text: $toDoText)
+            TextField("Enter To Do here:", text: $item)
                 .font(.title)
                 .textFieldStyle(.roundedBorder)
                 .padding(.vertical)
@@ -51,16 +55,35 @@ struct DetailView: View {
             }
             ToolbarItem(placement: .topBarTrailing) {
                 Button("Save") {
-                    // TODO: save()
+                    // move data from local vars to ToDo object
+                    toDo.item = item
+                    toDo.reminderIsOn = reminderIsOn
+                    toDo.dueDate = dueDate
+                    toDo.notes = notes
+                    toDo.isCompleted = isCompleted
+                    modelContext.insert(toDo)
+                    guard let _ = try? modelContext.save() else {
+                        print("‼️ ERROR: Save on DetailView() did not work.")
+                        return
+                    }
+                    dismiss()
                 }
             }
         }
         .navigationBarBackButtonHidden()
+        .onAppear() {
+            item = toDo.item
+            reminderIsOn = toDo.reminderIsOn
+            dueDate = toDo.dueDate
+            notes = toDo.notes
+            isCompleted = toDo.isCompleted
+        }
     }
 }
 
 #Preview {
     NavigationStack {
-        DetailView(toDoText: "")
+        DetailView(toDo: ToDo())
+            .modelContainer(for: ToDo.self, inMemory: true)
     }
 }
