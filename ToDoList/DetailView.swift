@@ -20,6 +20,8 @@ struct DetailView: View {
     @Environment(\.dismiss) private var dismiss
     @Environment(\.modelContext) var modelContext
     
+    @FocusState private var isFocused: Bool
+    
     var body: some View {
         List {
             TextField("Enter To Do here:", text: $item)
@@ -27,6 +29,7 @@ struct DetailView: View {
                 .textFieldStyle(.roundedBorder)
                 .padding(.vertical)
                 .listRowSeparator(.hidden)
+                .focused($isFocused)
             
             Toggle("Set Reminder:", isOn: $reminderIsOn)
                 .listRowSeparator(.hidden)
@@ -77,6 +80,7 @@ struct DetailView: View {
             dueDate = toDo.dueDate
             notes = toDo.notes
             isCompleted = toDo.isCompleted
+            isFocused = true
         }
     }
 }
