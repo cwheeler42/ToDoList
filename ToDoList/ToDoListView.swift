@@ -18,44 +18,54 @@ struct ToDoListView: View {
         NavigationStack {
             List {
                 ForEach(toDos) { toDo in
-                    HStack {
-                        Image(systemName: toDo.isCompleted ? "checkmark.rectangle" : "rectangle")
-                            .onTapGesture {
-                                toDo.isCompleted.toggle()
-                                guard let _ = try? modelContext.save() else {
-                                    print("‼️ ERROR: Save on .toggle on ToDoListView did not work.")
-                                    return
+                    VStack(alignment: .leading) {
+                        HStack {
+                            Image(systemName: toDo.isCompleted ? "checkmark.rectangle" : "rectangle")
+                                .onTapGesture {
+                                    toDo.isCompleted.toggle()
+                                    guard let _ = try? modelContext.save() else {
+                                        print("‼️ ERROR: Save on .toggle on ToDoListView did not work.")
+                                        return
+                                    }
                                 }
-                            }
-                        
-                        NavigationLink {
-                            DetailView(toDo: toDo)
-                        } label: {
-                            Text(toDo.item)
-                        }
-                        .swipeActions {
-                            // Fancier button
-                            Button(role: .destructive) {
-                                modelContext.delete(toDo)
-                                guard let _ = try? modelContext.save() else {
-                                    print("‼️ ERROR: Save on ToDoListView() did not work.")
-                                    return
-                                }
-                            } label: {
-                                Image(systemName: "trash.fill")
-                            }
                             
-                            // Simple button
-                            //                        Button("Delete", role: .destructive) {
-                            //                            modelContext.delete(toDo)
-                            //                            guard let _ = try? modelContext.save() else {
-                            //                                print("‼️ ERROR: Save on ToDoListView() did not work.")
-                            //                                return
-                            //                            }
-                            //                        }
+                            NavigationLink {
+                                DetailView(toDo: toDo)
+                            } label: {
+                                Text(toDo.item)
+                            }
+                            .swipeActions {
+                                // Fancier button
+                                Button(role: .destructive) {
+                                    modelContext.delete(toDo)
+                                    guard let _ = try? modelContext.save() else {
+                                        print("‼️ ERROR: Save on ToDoListView() did not work.")
+                                        return
+                                    }
+                                } label: {
+                                    Image(systemName: "trash.fill")
+                                }
+                                
+                                // Simple button
+                                //                        Button("Delete", role: .destructive) {
+                                //                            modelContext.delete(toDo)
+                                //                            guard let _ = try? modelContext.save() else {
+                                //                                print("‼️ ERROR: Save on ToDoListView() did not work.")
+                                //                                return
+                                //                            }
+                                //                        }
+                            }
+                        }
+                        .font(.title2)
+                        
+                        HStack {
+                            Text(toDo.dueDate.formatted(date: .abbreviated, time: .shortened))
+                            if toDo.reminderIsOn {
+                                Image(systemName: "calendar.badge.clock")
+                                    .symbolRenderingMode(.multicolor)
+                            }
                         }
                     }
-                    .font(.title2)
                 }
             }
             .listStyle(.plain)
@@ -80,5 +90,5 @@ struct ToDoListView: View {
 
 #Preview {
     ToDoListView()
-        .modelContainer(for: ToDo.self, inMemory: true)
+        .modelContainer(ToDo.preview)
 }
